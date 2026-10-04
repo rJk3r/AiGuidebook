@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Промпт-инжиниринг · Библиотека</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-400-normal.woff2" rel="preload" as="font" type="font/woff2" crossorigin>
+<style>
+    :root {
+        --bg: #0a0a0b;
+        --bg-elev: #141416;
+        --bg-card: #1a1a1d;
+        --border: #2a2a2e;
+        --text: #e8e8ea;
+        --muted: #8a8a92;
+        --accent: #7c5cff;
+        --accent-2: #4ade80;
+        --bad: #ef4444;
+        --good: #22c55e;
+        --warn: #f59e0b;
+        --code-bg: #0f0f12;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.65;
+        font-size: 16px;
+        -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+    /* Header */
+    header { border-bottom: 1px solid var(--border); padding-bottom: 2rem; margin-bottom: 2.5rem; }
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, #fff 0%, #7c5cff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+    }
+    .lead { color: var(--muted); font-size: 1.1rem; max-width: 720px; }
+
+    /* Nav */
+    nav {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin: 2rem 0 3rem;
+        position: sticky;
+        top: 0;
+        background: rgba(10,10,11,0.85);
+        backdrop-filter: blur(12px);
+        padding: 1rem 0;
+        z-index: 10;
+        border-bottom: 1px solid var(--border);
+    }
+    nav a {
+        text-decoration: none;
+        color: var(--text);
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    nav a:hover { border-color: var(--accent); color: var(--accent); }
+    nav a span.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    nav a.t-text .dot { background: var(--accent); }
+    nav a.t-img .dot { background: var(--warn); }
+    nav a.t-video .dot { background: var(--accent-2); }
+
+    /* Sections */
+    section { margin-bottom: 4rem; scroll-margin-top: 80px; }
+    h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    h2 .badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .badge-text { background: var(--accent); color: #fff; }
+    .badge-img { background: var(--warn); color: #000; }
+    .badge-video { background: var(--accent-2); color: #000; }
+    .section-lead { color: var(--muted); margin-bottom: 2rem; }
+
+    h3 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 2rem 0 0.75rem;
+        color: #fff;
+    }
+    h4 { font-size: 0.95rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    p { margin-bottom: 0.85rem; }
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.4rem; }
+    strong { color: #fff; }
+    em { color: var(--muted); font-style: italic; }
+    code.inline {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+        font-size: 0.88em;
+        color: #c4b5fd;
+    }
+
+    /* Cases */
+    .case {
+        padding: 1.1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border-left: 3px solid;
+        background: var(--bg-card);
+    }
+    .case.good { border-color: var(--good); }
+    .case.bad { border-color: var(--bad); }
+    .case-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .case.good .case-title { color: var(--good); }
+    .case.bad .case-title { color: var(--bad); }
+    .case p { margin-bottom: 0.4rem; }
+    .case p:last-child { margin-bottom: 0; }
+
+    /* Code blocks */
+    pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.25rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+        font-size: 0.85rem;
+        line-height: 1.65;
+        margin-bottom: 1.25rem;
+        color: #d4d4d8;
+    }
+    pre .k { color: #c4b5fd; }   /* keyword */
+    pre .c { color: #6b7280; }   /* comment */
+    pre .s { color: #86efac; }   /* string */
+
+    /* Grid of examples */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.1rem 1.25rem;
+        transition: border-color 0.2s;
+    }
+    .card:hover { border-color: var(--accent); }
+    .card h4 { margin-top: 0; color: #fff; font-size: 1rem; text-transform: none; letter-spacing: 0; }
+    .card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .card .formula {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8rem;
+        color: var(--accent);
+        background: var(--code-bg);
+        padding: 0.4rem 0.6rem;
+        border-radius: 4px;
+        display: inline-block;
+        margin-top: 0.4rem;
+    }
+
+    /* Principle list */
+    .principles {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.75rem;
+        margin: 1.5rem 0 2rem;
+    }
+    .principle {
+        background: var(--bg-elev);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.9rem 1rem;
+    }
+    .principle .num {
+        display: inline-block;
+        width: 24px; height: 24px;
+        background: var(--accent);
+        color: #fff;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 24px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-right: 0.5rem;
+    }
+    .principle strong { font-size: 0.9rem; }
+    .principle p { font-size: 0.85rem; color: var(--muted); margin: 0.3rem 0 0; }
+
+    /* Divider */
+    hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 3rem 0;
+    }
+
+    /* Footer */
+    footer {
+        border-top: 1px solid var(--border);
+        padding-top: 2rem;
+        margin-top: 3rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+        text-align: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+        h1 { font-size: 1.8rem; }
+        h2 { font-size: 1.4rem; }
+        .wrap { padding: 2rem 1rem 3rem; }
+        pre { font-size: 0.78rem; }
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <h1>Промпт-инжиниринг</h1>
+    <p class="lead">Библиотека рабочих паттернов для генерации текста, изображений и видео. Без воды. Только формулы, примеры и разбор ошибок.</p>
+</header>
+
+<nav>
+    <a href="#text" class="t-text"><span class="dot"></span>Текст</a>
+    <a href="#image" class="t-img"><span class="dot"></span>Картинки</a>
+    <a href="#video" class="t-video"><span class="dot"></span>Видео</a>
+    <a href="#mistakes"><span class="dot" style="background:var(--bad)"></span>Ошибки</a>
+</nav>
+
+<!-- ========================= ТЕКСТ ========================= -->
+<section id="text">
+    <h2>Генерация текста <span class="badge badge-text">ChatGPT · Claude · Qwen</span></h2>
+    <p class="section-lead">ИИ — не гадалка. Он буквально понимает формулировки. Чем точнее ТЗ, тем ближе результат к публикации.</p>
+
+    <h3>Формула промпта</h3>
+    <div class="principles">
+        <div class="principle"><span class="num">1</span><strong>Роль</strong><p>«Ты — UX-дизайнер», «Ты — бариста с 10-летним стажем».</p></div>
+        <div class="principle"><span class="num">2</span><strong>Контекст</strong><p>Аудитория, продукт, ситуация, известные факты.</p></div>
+        <div class="principle"><span class="num">3</span><strong>Задача</strong><p>Конкретное действие без воды: «создай», «сократи», «сравни».</p></div>
+        <div class="principle"><span class="num">4</span><strong>Ограничения</strong><p>Объём, стиль, что нельзя менять, что нельзя выдумывать.</p></div>
+        <div class="principle"><span class="num">5</span><strong>Формат</strong><p>Список, таблица, JSON, письмо, план, код.</p></div>
+        <div class="principle"><span class="num">6</span><strong>Критерий</strong><p>Как проверить, что ответ хорош.</p></div>
+    </div>
+
+    <h3>Эволюция промпта: от плохого к хорошему</h3>
+    <div class="case bad">
+        <div class="case-title">❌ Шаг 1. Мусорный запрос</div>
+        <p><code class="inline">Напиши пост про кофе.</code></p>
+        <p>Результат: «Кофе — популярный напиток. Он бодрит и имеет богатую историю…»</p>
+    </div>
+    <div class="case bad">
+        <div class="case-title">❌ Шаг 2. Добавили стиль, но нет роли</div>
+        <p><code class="inline">Напиши пост о кофе для соцсетей в дружелюбном стиле.</code></p>
+        <p>Результат: чуть живее, но всё ещё шаблон.</p>
+    </div>
+    <div class="case good">
+        <div class="case-title">✅ Шаг 3. Добавили роль и контекст</div>
+        <p><code class="inline">Ты — бариста с 10-летним опытом. Напиши пост для соцсетей (до 300 слов) о том, почему ты любишь кофе. Личный стиль, от первого лица.</code></p>
+    </div>
+    <div class="case good">
+        <div class="case-title">✅ Шаг 4. Точное ТЗ</div>
+        <p><code class="inline">Ты — бариста с 10-летним стажем. Напиши пост для соцсетей (до 300 слов) о различиях арабики и робусты. Добавь метафору, лёгкий юмор, обращайся к аудитории на «ты». Избегай канцеляризмов.</code></p>
+    </div>
+
+    <h3>Рабочие шаблоны промптов</h3>
+
+    <h4>Контент и маркетинг</h4>
+    <pre><span class="c"># Контент-план для Instagram</span>
+Составь контент-план для [бренд: студия красоты "Vibe"] на [месяц: июнь].
+Услуги: маникюр, педикюр, архитектура бровей, ресницы, перманент, парикмахер.
+Периодичность: 7 постов в неделю.
+Соотношение по цели: 30% продающие, 30% полезные, 40% вовлекающие.
+Соотношение по формату: 60% Reels, 30% карусель, 10% IGTV.
+Тон: неформальный, прямой, заботливый. Обращение на «ты».
+Таблица: Дата | Цель | Формат | Заголовок-кликбейт | Краткое описание.
+Не придумывай кейсы и цифры.</pre>
+
+    <pre><span class="c"># Сценарий Reels по формуле P.O.P.P</span>
+Действуй как сценарист Reels. Используй формулу:
+P — Проблема: «Ты не создашь хороший контент-план без…»
+O — Возможность: «Создать контент-план можно за 2 минуты…»
+P — Практические шаги: перечисли пошагово.
+P — Обещание: гарантия результата + призыв подписаться.
+Тема: [вставь тему].
+Хронометраж: до 30 секунд.</pre>
+
+    <pre><span class="c"># Ценностное предложение</span>
+Сформулируй 5 вариантов ценностного предложения для [продукт].
+Для кого: [аудитория].
+Какую задачу решает: [описание].
+Подтверждённые преимущества: [факты].
+Что нельзя обещать: [ограничения].
+Без превосходных степеней и неподтверждённых цифр.</pre>
+
+    <pre><span class="c"># Описание товара для маркетплейса</span>
+Напиши описание товара [название].
+Характеристики: [факты].
+Аудитория и сценарий использования: [описание].
+Ограничения: [список].
+Сначала — кому и для чего подходит. Затем переведи характеристики в практическую пользу.
+Не добавляй отзывы и свойства, которых нет во входных данных.</pre>
+
+    <h4>Редактура и работа с текстом</h4>
+    <pre><span class="c"># Сокращение текста без потери смысла</span>
+Сократи текст примерно на [30%], сохранив факты, выводы и оговорки.
+[вставьте текст]
+Убери повторы, вводные фразы, очевидные пояснения.
+Не добавляй новых утверждений.
+После новой версии — список удалённого.</pre>
+
+    <pre><span class="c"># Редактура с сохранением голоса автора</span>
+Отредактируй текст, сохранив мой голос.
+[вставьте текст]
+Исправь логику, повторы, канцеляризмы, языковые ошибки.
+Разбей длинные предложения.
+Не добавляй пафос, клише и факты от себя.
+Сначала — чистовая версия, затем список существенных изменений.</pre>
+
+    <pre><span class="c"># Упрощение сложного текста</span>
+Перепиши текст для аудитории [кто читает].
+[вставьте текст]
+Сохрани факты и позицию автора.
+Разбей длинные предложения, объясни жаргон, замени абстракции конкретикой.
+Не делай тон рекламным, если его нет в оригинале.</pre>
+
+    <h4>Аналитика и исследования</h4>
+    <pre><span class="c"># Анализ таблицы</span>
+Проанализируй таблицу: [данные или описание столбцов].
+Цель анализа: [вопрос].
+1. Проверь пропуски, дубли, несопоставимые значения.
+2. Покажи ключевые изменения, аномалии, возможные объяснения.
+3. Не выдавай корреляцию за причину.
+4. Предложи, какие данные нужны для проверки гипотезы.</pre>
+
+    <pre><span class="c"># Поиск причин проблемы</span>
+Разбери проблему: [описание].
+Факты: [список]. Когда началось: [дата]. Что менялось: [события].
+Сформулируй несколько конкурирующих объяснений.
+Для каждого — подтверждающие и опровергающие признаки.
+Предложи самый дешёвый и безопасный способ проверки.</pre>
+
+    <pre><span class="c"># Проверка аргументации</span>
+Проверь аргументацию текста: [вставьте текст].
+Выдели: главный вывод, посылки, скрытые предположения, доказательства.
+Найди логические скачки и альтернативные объяснения.
+Не спорь со стилем — оценивай только обоснование.</pre>
+
+    <h4>Деловая переписка и карьера</h4>
+    <pre><span class="c"># Деловое письмо</span>
+Напиши деловое письмо [кому] на тему [тема].
+Контекст: [что произошло].
+Цель: [желаемый следующий шаг].
+Факты, которые нельзя менять: [список].
+Тон — профессиональный и спокойный. До 180 слов.
+Понятная тема письма + один конкретный призыв к действию.</pre>
+
+    <pre><span class="c"># Сопроводительное письмо</span>
+Позиция: [должность] в [компания].
+Требования вакансии: [текст].
+Мой релевантный опыт: [факты].
+Почему интересна компания: [причина].
+Свяжи 2–3 требования с моими реальными достижениями.
+Тон — живой и профессиональный. До 220 слов, без штампов.</pre>
+
+    <pre><span class="c"># Улучшение резюме</span>
+Проверь резюме для позиции [должность].
+[вставьте текст]
+Сохрани только подтверждённые факты.
+Усиль формулировки достижений. Отметь, где не хватает цифр.
+Убери общие фразы. Предложи краткое описание профиля.
+Не выдумывай опыт или результаты.</pre>
+
+    <h4>Учёба и объяснения</h4>
+    <pre><span class="c"># Объяснить тему простыми словами</span>
+Объясни [тема] для уровня [класс / начинающий].
+1. Простое определение.
+2. Аналогия + один разобранный пример.
+3. Три вопроса для самопроверки (ответы не показывай, пока я не отвечу).</pre>
+
+    <pre><span class="c"># План подготовки к экзамену</span>
+Предмет: [предмет]. Срок: [период].
+Мой уровень: [описание]. Слабые темы: [список]. Время в день: [число].
+Разбей план по дням: теория, практика, повторение, контроль.
+Оставь резерв. Предложи способ проверять прогресс каждую неделю.</pre>
+
+    <pre><span class="c"># Учебные карточки</span>
+Создай [N] карточек по материалу: [вставьте конспект].
+Лицевая сторона — вопрос или термин.
+Обратная — короткий ответ только по источнику.
+Порядок: от базовых понятий к связям и применению.</pre>
+
+    <h4>Программирование</h4>
+    <pre><span class="c"># Объяснить незнакомый код</span>
+Объясни код человеку уровня [начинающий/средний]:
+[вставьте код]
+1. Назначение целиком.
+2. Поток данных и важные участки.
+3. Внешние зависимости, побочные эффекты.
+4. Места, которые нужно проверить запуском.</pre>
+
+    <pre><span class="c"># Функция с тестами</span>
+Напиши функцию на [язык], которая [задача].
+Вход: [формат]. Выход: [формат].
+Ошибочные случаи: [список].
+Ограничения: [производительность, зависимости].
+Сначала уточни неоднозначности.
+Затем — реализация, объяснение, тесты для обычных/граничных/ошибочных случаев.</pre>
+
+    <pre><span class="c"># Code review</span>
+Проведи review кода: [вставьте код].
+Контекст и требования: [описание].
+Ищи ошибки корректности, безопасности, производительности, поддержки.
+Для каждого замечания: конкретное место, реальный сценарий сбоя, минимальное исправление.
+Не требуй рефакторинг без практической причины.</pre>
+
+    <h4>Мета-промты (универсальные)</h4>
+    <pre><span class="c"># Сначала задать уточняющие вопросы</span>
+Не выполняй задачу сразу.
+Моя задача: [описание].
+Задай только те вопросы, ответы на которые существенно изменят результат.
+Для каждого — коротко, почему он важен.
+После моих ответов сформулируй план и дождись подтверждения.</pre>
+
+    <pre><span class="c"># Улучшить мой промт</span>
+Улучши мой промт: [вставьте промт].
+1. Объясни, какой информации не хватает.
+2. Задай до 5 уточняющих вопросов.
+3. Дай улучшенную версию: задача, контекст, данные, ограничения, формат, критерий.</pre>
+
+    <pre><span class="c"># Работать только по источнику</span>
+Ответь на вопрос только по материалу ниже.
+Вопрос: [вопрос].
+Источник: [вставьте текст].
+Для каждого вывода — опора из источника.
+Если ответа нет — скажи об этом и перечисли недостающие данные.
+Не используй знания вне материала.</pre>
+</section>
+
+<hr>
+
+<!-- ========================= КАРТИНКИ ========================= -->
+<section id="image">
+    <h2>Генерация картинок <span class="badge badge-img">Midjourney · DALL·E · Stable Diffusion · Imagen</span></h2>
+    <p class="section-lead">Изображение — это один кадр. Здесь важны свет, композиция, стиль, камера. Под разные модели — разные промпты.</p>
+
+    <h3>Формула промпта</h3>
+    <div class="principles">
+        <div class="principle"><span class="num">1</span><strong>Субъект</strong><p>Кто/что в кадре, поза, действие.</p></div>
+        <div class="principle"><span class="num">2</span><strong>Окружение</strong><p>Локация, фон, время суток, погода.</p></div>
+        <div class="principle"><span class="num">3</span><strong>Стиль</strong><p>Photorealistic, anime, cinematic, VHS, low poly.</p></div>
+        <div class="principle"><span class="num">4</span><strong>Свет</strong><p>Golden hour, Rembrandt, rim light, neon.</p></div>
+        <div class="principle"><span class="num">5</span><strong>Камера</strong><p>85mm f/1.2, drone view, macro, wide angle.</p></div>
+        <div class="principle"><span class="num">6</span><strong>Параметры</strong><p>--ar 16:9, --v 6, --no watermark.</p></div>
+    </div>
+
+    <h3>Плохой vs хороший промпт</h3>
+    <div class="case bad">
+        <div class="case-title">❌ Плохой кейс</div>
+        <p><code class="inline">Красивая девушка в городе, эпично, 4k</code></p>
+        <p>Результат: пластиковое лицо, хаотичный свет, артефакты на фоне, нет художественного замысла.</p>
+    </div>
+    <div class="case good">
+        <div class="case-title">✅ Хороший кейс</div>
+        <p><code class="inline">Cinematic portrait, young woman, rainy neon street at night, golden hour backlight through window, soft rim light, 85mm f/1.2, shallow depth of field, film grain, teal and orange color grade, photorealistic, 8k, --ar 16:9</code></p>
+        <p>Результат: контролируемая глубина резкости, профессиональная светотень, предсказуемая стилистика.</p>
+    </div>
+
+    <h3>Шаблоны промптов</h3>
+
+    <h4>Портреты и люди</h4>
+    <pre><span class="c"># Портрет в стиле golden hour</span>
+Cinematic portrait of a young woman, golden hour backlight, soft rim light on hair, 85mm lens, f/1.2, shallow depth of field, warm amber tones, film grain, photorealistic, highly detailed, 8k, --ar 3:4
+
+<span class="c"># Деловой портрет</span>
+Professional headshot, confident man in his 30s, studio lighting with soft Rembrandt key light, neutral grey background, sharp focus on eyes, corporate style, Canon EOS R5, 85mm, --ar 1:1
+
+<span class="c"># Детский портрет без «взросления»</span>
+Authentic child portrait, 6-year-old girl, natural smile, soft window light, warm tones, preserved exact age and child features, no adult features, no makeup, documentary style, --no aging, no adult features, no makeup</pre>
+
+    <h4>Пейзажи и окружение</h4>
+    <pre><span class="c"># Осенний лес</span>
+Cinematic autumn forest, golden amber trees lining empty path, leaves slowly falling, morning mist, god rays through canopy, warm earth tones, shot on Hasselblad, highly detailed, --ar 16:9
+
+<span class="c"># Киберпанк-город</span>
+Cyberpunk city street at night, heavy rain, wet cobblestone reflecting neon signs, volumetric fog, flying cars in distance, cinematic lighting, teal and orange color grade, Unreal Engine 5 render, --ar 21:9
+
+<span class="c"># Горный рассвет</span>
+Epic mountain landscape, dramatic sunrise over alpine peaks, golden rays breaking through storm clouds, morning mist filling valleys, muted earth tones with warm golden accents, drone photography, --ar 16:9
+
+<span class="c"># Северное сияние</span>
+Aurora borealis over frozen Arctic lake, green and violet lights across starry sky, perfect reflection in dark ice, snow-covered pine trees, long exposure photography, --ar 16:9</pre>
+
+    <h4>Предметная съёмка</h4>
+    <pre><span class="c"># Смарт-часы на матовом фоне</span>
+Glossy black smartwatch on matte black surface, soft studio light from top and side, realistic reflections and micro-highlights, macro photography, high detail, Apple product photography style, minimalism, --ar 1:1
+
+<span class="c"># Парфюм luxury</span>
+Luxury perfume bottle on marble surface, soft light from top and side, camera orbiting the product, highlights on glass, cinematic advertising style, dark neutral background, --ar 1:1
+
+<span class="c"># Чашка кофе lifestyle</span>
+Ceramic coffee cup on wooden table, steam rising, soft morning window light from left, warm amber interior tones, cozy authentic lifestyle mood, shallow depth of field, 50mm lens, --ar 4:5</pre>
+
+    <h4>Стилизация и концепт-арт</h4>
+    <pre><span class="c"># Стиль Studio Ghibli</span>
+Cozy countryside cottage, Studio Ghibli style, hand-painted watercolor, soft pastel palette, fluffy clouds, warm afternoon light, whimsical details, Hayao Miyazaki aesthetic, --ar 16:9
+
+<span class="c"># Фэнтези-маг</span>
+Mage in dark robe casting glowing runes in forest clearing, purple mist, cinematic lighting, epic fantasy concept art, detailed illustration, ArtStation trending, --ar 16:9
+
+<span class="c"># Steampunk-робот</span>
+Giant steampunk robot walking through burning city, smoke and fire, debris falling, orange-blue cinematic color grading, intense mood, detailed mechanical design, --ar 21:9</pre>
+
+    <h4>Карусели и серии (Instagram)</h4>
+    <pre><span class="c"># High fashion editorial карусель</span>
+High fashion editorial photography, [образ/тема], consistent visual style throughout, muted earth tones palette, Canon 85mm f/1.2, film grain, each frame tells a story, --no inconsistent colors, no mixed styles, no watermark
+
+<span class="c"># Осенняя серия (5 кадров)</span>
+Cinematic autumn [локация], golden hour warm light, falling leaves, film grain, warm earth tones, consistent mood throughout sequence.
+Вариации: 1) тропа в лесу, 2) чашка кофе у окна, 3) книга на пледе, 4) силуэт в парке, 5) детали (листья, шарф).</pre>
+
+    <h4>Оживление архивных фото (Image-to-Image)</h4>
+    <pre><span class="c"># Советское архивное фото</span>
+[Soviet historical photo as input]
+Preserve composition and faces exactly. Style: vintage film photography, grain, sepia tones. Remove modern artifacts, sharpen faces, do not change age or clothing, --no modern elements, plastic skin, watermark
+
+<span class="c"># Семейное фото</span>
+[Family photo as input]
+Preserve all faces exactly. Warm nostalgic atmosphere, film grain, historical style preserved, --no face changes, no modern elements</pre>
+</section>
+
+<hr>
+
+<!-- ========================= ВИДЕО ========================= -->
+<section id="video">
+    <h2>Генерация видео <span class="badge badge-video">Kling · Runway · Sora · Veo · Hailuo</span></h2>
+    <p class="section-lead">Видео — это движение. Здесь важны темп, камера, последовательность. Один и тот же запрос в Kling и Runway даёт разный результат — тестируйте.</p>
+
+    <h3>Формула промпта</h3>
+    <div class="principles">
+        <div class="principle"><span class="num">1</span><strong>Стиль (первым словом)</strong><p>Cinematic, documentary, commercial, aerial.</p></div>
+        <div class="principle"><span class="num">2</span><strong>Субъект / сцена</strong><p>Кто/что в кадре, где.</p></div>
+        <div class="principle"><span class="num">3</span><strong>Движение камеры</strong><p>Медленное и конкретное: slowly panning, gently drifting.</p></div>
+        <div class="principle"><span class="num">4</span><strong>Естественное движение</strong><p>Leaves falling, steam rising, wind in hair.</p></div>
+        <div class="principle"><span class="num">5</span><strong>Атмосфера и свет</strong><p>Golden hour, film grain, Rembrandt lighting.</p></div>
+        <div class="principle"><span class="num">6</span><strong>Негативный промпт</strong><p>Без резких движений, без артефактов, без текста.</p></div>
+    </div>
+
+    <h3>Плохой vs хороший промпт</h3>
+    <div class="case bad">
+        <div class="case-title">❌ Плохой кейс</div>
+        <p><code class="inline">Кот на крыше, эпичный трейлер постапокалипсиса</code></p>
+        <p>Результат: морфинг объектов, неестественная физика, дёрганая камера, искажения.</p>
+    </div>
+    <div class="case good">
+        <div class="case-title">✅ Хороший кейс</div>
+        <p><code class="inline">Cinematic autumn forest, golden amber trees lining empty path, leaves slowly falling naturally, camera gently drifting forward, golden hour warm light, film grain. Negative: no people, no sudden movements, no text.</code></p>
+        <p>Результат: стабильная сцена, предсказуемая динамика, кинематографичный ритм.</p>
+    </div>
+
+    <h3>Шаблоны промптов</h3>
+
+    <h4>Image-to-Video: оживление портретов</h4>
+    <pre><span class="c"># Базовое оживление портрета (Hailuo 02, Strength 0.45)</span>
+Сохрани черты лица человека на фото точно.
+Камера медленно и плавно приближается к лицу.
+Лёгкий ветер двигает волосы.
+Тёплый мягкий свет. Cinematic portrait mood.
+Negative: без изменения черт лица, без деформации, без резких движений, без артефактов.
+
+<span class="c"># Golden hour lifestyle (Strength 0.45)</span>
+Сохрани черты лица. Камера медленно приближается. Лёгкий ветер двигает волосы.
+Golden hour backlight creates warm rim light. Soft cinematic portrait, fashion editorial mood.
+Negative: без изменения черт, без резких движений, cold tones.
+
+<span class="c"># Деловой портрет (Strength 0.4)</span>
+Сохрани черты лица. Камера очень медленно приближается. Минимальное естественное движение.
+Studio professional lighting preserved. Confident professional atmosphere.
+Negative: без изменения черт, без лишних движений, без деформации.
+
+<span class="c"># Детский портрет без изменения возраста (Strength 0.4)</span>
+Сохрани черты лица ребёнка точно, без изменения возраста. Exact child age preserved.
+Камера медленно приближается. Тёплый мягкий свет. Joyful authentic childhood mood.
+Negative: без изменения возраста, без взрослых черт, без резких движений.
+
+<span class="c"># Парный снимок (Strength 0.45)</span>
+Сохрани черты лиц обоих людей точно.
+Камера медленно отъезжает назад, раскрывая сцену. Лёгкий ветер.
+Тёплая золотая атмосфера. Romantic candid moment.
+Negative: без изменения черт лиц, без деформации, без резких движений.
+
+<span class="c"># Групповое фото (Strength 0.4)</span>
+Сохрани черты лиц всех людей на фото.
+Камера медленно отъезжает назад. Warm natural light preserved.
+Authentic candid group moment.
+Negative: без изменения черт, без деформации, без резких движений.</pre>
+
+    <h4>Архивные и исторические снимки</h4>
+    <pre><span class="c"># Семейное архивное фото (Strength 0.4)</span>
+Сохрани черты лиц всех людей точно. Камера медленно отъезжает назад.
+Тёплая ностальгическая атмосфера. Film grain. Исторический стиль сохранён.
+Negative: без изменения черт, без резких движений, без современных элементов.
+
+<span class="c"># Советский архивный снимок (Strength 0.4)</span>
+Сохрани черты лиц. Камера очень медленно приближается.
+Ностальгическая тёплая атмосфера. Film grain. Soviet historical aesthetic preserved.
+Negative: без изменения черт, без современных элементов, без резких движений.</pre>
+
+    <h4>Танцы и Motion Control (Kling 2.6, Strength 0.45)</h4>
+    <pre><span class="c"># Энергичный танец</span>
+Сохрани черты лица.
+Energetic rhythmic dance movement following reference exactly, sharp arm accents on beat, confident direct gaze to camera, natural body physics, smooth motion transfer.
+Negative: без изменения черт, stiff movement, robotic arms, distorted limbs.
+
+<span class="c"># Лиричная хореография</span>
+Сохрани черты лица.
+Smooth lyrical arm transitions following reference exactly, gentle body sway, fluid movement without sharp accents, soft natural body physics, emotional authentic expression.
+Negative: без изменения черт, sharp jerky movements, stiff arms.
+
+<span class="c"># Кот в деловом костюме (комедия)</span>
+Serious tabby cat in expensive tailored business suit, energetic rhythmic dance following reference exactly, completely deadpan expression maintained throughout, natural body physics, smooth motion transfer, comedic contrast.
+Negative: cute playful expression, stiff movement, distorted, cartoon.</pre>
+
+    <h4>Text-to-Video: природа</h4>
+    <pre><span class="c"># Осенний лес (Kling 2.6)</span>
+Cinematic autumn forest, golden amber trees lining empty path, leaves slowly falling naturally, camera gently drifting forward, golden hour warm light, film grain, warm earth tones.
+Negative: без людей, без резких движений, без текста, cold tones, watermark.
+
+<span class="c"># Морской прибой на закате (Sora 2 Pro)</span>
+Epic seascape, ocean waves moving toward shoreline with realistic physics, camera slowly pulling back to reveal full horizon, dramatic sunset colours, golden reflections dancing on water, cinematic mood, film grain.
+Negative: без людей, без артефактов воды, без резких движений.
+
+<span class="c"># Горный рассвет (Sora 2 Pro)</span>
+Epic mountain landscape, dramatic sunrise over alpine peaks, golden rays breaking through storm clouds, morning mist filling valleys, camera slowly pulling back to reveal scale, muted earth tones with warm golden accents.
+Negative: без людей, без зданий, без текста, midday flat light.
+
+<span class="c"># Зимний лес со снегопадом (Kling 2.6)</span>
+Cinematic winter forest, soft snowfall through pine trees, camera slowly drifting forward along path, cold blue tones with warm cabin light in distance, shallow depth of field, film grain, peaceful magical atmosphere.
+Negative: без людей, без резких движений, без текста, summer elements.
+
+<span class="c"># Весенний цветущий сад (Kling 2.6)</span>
+Cinematic spring garden, cherry blossom petals slowly falling, camera gently drifting forward through blooming trees, soft pastel pink and white tones, shallow depth of field, film grain, dreamy romantic spring mood.
+Negative: без людей, без резких движений, без текста, autumn elements.
+
+<span class="c"># Северное сияние (Sora 2 Pro)</span>
+Spectacular aurora borealis over frozen Arctic lake, dramatic green and violet lights moving across starry sky, perfect reflection in dark ice, snow covered pine trees, camera slowly pulling back, breathtaking natural phenomenon.
+Negative: без людей, без зданий, clouds, light pollution.</pre>
+
+    <h4>Городские и ночные сцены</h4>
+    <pre><span class="c"># Ночной дождь в городе (Kling 2.6)</span>
+Cinematic city street at night, heavy rain falling, empty cobblestone street, wet pavement reflecting neon signs, atmospheric fog, camera slowly panning left, film grain, teal and orange color grade, moody atmosphere.
+Negative: без людей на переднем плане, без резких движений, без текста, daytime.
+
+<span class="c"># Городские огни, аэросъёмка (Kling 2.6)</span>
+Cinematic aerial city, drone slowly ascending above glowing city skyline at blue hour, thousands of warm lights below, river reflecting city lights, dramatic sky, wide angle epic composition.
+Negative: без текста, без резких движений, daytime.
+
+<span class="c"># Уличное кафе вечером (Runway Gen-4)</span>
+Cinematic street, charming cafe exterior at evening, small tables outside, warm glowing windows, potted plants, cobblestone, camera slowly pushing in, warm amber light contrasting with cool blue dusk, film grain.
+Negative: busy crowd, daytime, без текста.</pre>
+
+    <h4>Lifestyle и коммерческие ролики</h4>
+    <pre><span class="c"># Утренний кофе (Runway Gen-4, Image-to-Video, Strength 0.5)</span>
+Камера медленно приближается к чашке кофе.
+Steam rising naturally from hot coffee.
+Soft morning window light from left. Warm amber interior tones.
+Cosy authentic lifestyle mood.
+Negative: hands, text, cold colours, без резких движений.
+
+<span class="c"># Предметная luxury съёмка (Sora 2 Pro, Strength 0.5)</span>
+Камера медленно облетает предмет по дуге.
+Мягкий направленный свет создаёт реалистичные блики.
+Тёмный нейтральный фон. Рекламный кинематографичный стиль.
+Negative: без текста, без рук, без резких движений.
+
+<span class="c"># Демонстрация товара</span>
+Глянцевый [смартфон/часы/парфюм] медленно вращается на [белом/матовом] фоне, реалистичное освещение и мягкие тени, плавный зум камеры, формат 16:9, плавное движение, product demo style, 5 секунд.
+Negative: hands, text, cold colours, резкие движения, watermark.
+
+<span class="c"># Девушка на прогулке</span>
+Девушка в платье идёт по осеннему парку, листья под ногами, медленная походка, камера следует сбоку на уровне пояса, мягкий солнечный свет сквозь деревья, кинематографичный стиль, 9:16.
+Почему работает: один персонаж, простое движение, камера и свет описаны.
+
+<span class="c"># Портрет с движением</span>
+Крупный план девушки, лёгкий ветер шевелит волосы, мягкий свет в лицо, камера неподвижна, лёгкая улыбка, размытый фон, кинематографичный портрет, 9:16.
+Почему работает: фокус на лице, минимальное движение, простая композиция.
+
+<span class="c"># Спорт / фитнес</span>
+Девушка в спортивной одежде делает растяжку в зале, большие окна, мягкий свет, плавные движения, камера неподвижна на уровне пояса, минималистичный чистый фон, 9:16.
+
+<span class="c"># Дорога / движение</span>
+Машина едет по ночной трассе, фары освещают дорогу, камера закреплена сбоку на уровне капота, неон и отражения на мокром асфальте, кинематографичный стиль, 16:9.
+
+<span class="c"># Интерьер</span>
+Современная гостиная с панорамным окном, за окном город вечером, камера медленно движется от двери к окну, мягкий свет ламп и неона с улицы, кинематографичный стиль, 16:9.</pre>
+
+    <h4>Городские сцены с персонажем (шаблоны)</h4>
+    <pre><span class="c"># Шаблон: городская сцена</span>
+A [персонаж] walks slowly through a [локация: rainy city street at night], with [деталь: neon lights reflecting in puddles] and [фоновое действие: cars passing by].
+Cinematic lighting, moody atmosphere, camera panning from left to right, 16:9, [6 секунд].
+
+<span class="c"># Шаблон: динамичная сцена</span>
+A [персонаж] runs along a [forest trail during autumn], with [leaves falling around her and sunlight flickering through trees].
+Smooth drone shot following her from above, 4K, [5 секунд], realistic motion.
+
+<span class="c"># Шаблон: фантазийная сцена</span>
+A [giant steampunk robot] walks through a [burning city], with [smoke and fire around, debris falling].
+Camera shaking slightly, orange-blue cinematic color grading, intense mood, [6 секунд].
+
+<span class="c"># Шаблон: эмоциональный портрет</span>
+Close-up of a [персонаж] looking up with a [gentle smile], wind gently blowing hair, dramatic lighting from the side, shallow depth of field, slow camera zoom in, cinematic mood, [3 секунды].</pre>
+
+    <h4>Карусель для Instagram</h4>
+    <pre><span class="c"># 1. Генерация кадров (Midjourney)</span>
+High fashion editorial photography, [образ/тема], consistent visual style throughout, muted earth tones palette, Canon 85mm f/1.2, film grain, each frame tells a story.
+Negative: inconsistent colours, mixed styles, watermark.
+
+<span class="c"># 2. Оживление каждого кадра (Hailuo 02, Strength 0.4)</span>
+Камера медленно приближается. Минимальное естественное движение.
+Сохраняет атмосферу оригинала.
+Negative: без резких движений, без деформации, без артефактов.
+
+<span class="c"># 3. Осенняя сцена (Kling 2.6)</span>
+Cinematic autumn [локация], camera slowly drifting [вектор], golden hour warm light, falling leaves, film grain, warm earth tones, consistent mood throughout sequence.
+Negative: без людей, без резких движений, без текста, watermark.</pre>
+
+    <h4>Параметр Strength (для Image-to-Video)</h4>
+    <div class="grid">
+        <div class="card">
+            <h4>0.4</h4>
+            <p>Минимальное изменение, максимальное сохранение исходника. Для портретов и архивных фото.</p>
+        </div>
+        <div class="card">
+            <h4>0.45</h4>
+            <p>Оптимум для портретов с людьми. Баланс сохранения и движения.</p>
+        </div>
+        <div class="card">
+            <h4>0.5</h4>
+            <p>Баланс для пейзажей и предметной съёмки.</p>
+        </div>
+        <div class="card">
+            <h4>&gt; 0.6</h4>
+            <p>Лицо начинает меняться непредсказуемо. Избегать для портретов.</p>
+        </div>
+    </div>
+</section>
+
+<hr>
+
+<!-- ========================= ОШИБКИ ========================= -->
+<section id="mistakes">
+    <h2>Типичные ошибки <span class="badge" style="background:var(--bad);color:#fff;">Как не надо</span></h2>
+    <p class="section-lead">Самые частые грабли, на которые наступают новички. Коротко и по делу.</p>
+
+    <div class="case bad">
+        <div class="case-title">❌ Слишком общий промпт</div>
+        <p><code class="inline">Напиши статью.</code> / <code class="inline">Красивая картинка.</code> / <code class="inline">Эпичное видео.</code></p>
+        <p>Результат: банальность, «пластиковый» контент, артефакты. Добавляйте роль, контекст, ограничения.</p>
+    </div>
+
+    <div class="case bad">
+        <div class="case-title">❌ Нет контекста и аудитории</div>
+        <p><code class="inline">Напиши пост о новом продукте.</code></p>
+        <p>Вместо этого: «Энергичный пост для молодёжной аудитории о беспроводных наушниках [бренд]».</p>
+    </div>
+
+    <div class="case bad">
+        <div class="case-title">❌ Рано сдаться после первой попытки</div>
+        <p>Промт-инжиниринг — это 3–5 итераций. Первый ответ почти никогда не финальный. Уточняйте, переформулируйте, добавляйте детали.</p>
+    </div>
+
+    <div class="case bad">
+        <div class="case-title">❌ Видео: слишком много действий в одном промпте</div>
+        <p>Один тип движения на клип: либо камера, либо объект. Смешивание сложных действий = артефакты и морфинг.</p>
+    </div>
+
+    <div class="case bad">
+        <div class="case-title">❌ Видео: нет негативного промпта</div>
+        <p>Всегда указывайте, чего избегать: <code class="inline">без резких движений, без текста, без артефактов, без деформированных лиц</code>. Снижает число неудачных генераций вдвое.</p>
+    </div>
+
+    <div class="case bad">
+        <div class="case-title">❌ Видео: «ожидать текст в кадре»</div>
+        <p>Большинство моделей плохо генерируют читаемый текст. Надписи накладывайте при монтаже.</p>
+    </div>
+
+    <div class="case bad">
+        <div class="case-title">❌ Видео: Strength &gt; 0.6 для портретов</div>
+        <p>Лицо начинает меняться непредсказуемо. Для людей держите 0.4–0.45.</p>
+    </div>
+
+    <div class="case bad">
+        <div class="case-title">❌ Видео: дёрганая камера</div>
+        <p>Добавляйте: <code class="inline">slowly, gently, smoothly, stable composition</code>. Медленное движение предотвращает артефакты на всех моделях.</p>
+    </div>
+
+    <div class="case bad">
+        <div class="case-title">❌ Картинки: нет указания камеры и света</div>
+        <p>Без <code class="inline">85mm f/1.2, golden hour, rim light</code> — получите усреднённую «пластиковую» картинку.</p>
+    </div>
+
+    <div class="case bad">
+        <div class="case-title">❌ Текст: ИИ выдумывает факты</div>
+        <p>Всегда добавляйте: <code class="inline">Не придумывай кейсы и цифры. Работай только по источнику.</code> И проверяйте факты по первоисточникам.</p>
+    </div>
+
+    <div class="case bad">
+        <div class="case-title">❌ Текст: нет формата ответа</div>
+        <p>Указывайте: <code class="inline">таблица / JSON / список / письмо / план</code> и обязательные поля. Иначе получите «простыню» без структуры.</p>
+    </div>
+
+    <h3>Шесть правил хорошего промпта (чек-лист)</h3>
+    <div class="principles">
+        <div class="principle"><span class="num">1</span><strong>Цель</strong><p>Чётко, какой результат нужен.</p></div>
+        <div class="principle"><span class="num">2</span><strong>Контекст</strong><p>Данные о задаче, аудитории, проекте.</p></div>
+        <div class="principle"><span class="num">3</span><strong>Ограничения</strong><p>Что нельзя менять, какие требования.</p></div>
+        <div class="principle"><span class="num">4</span><strong>Формат</strong><p>Список, таблица, JSON, код, план.</p></div>
+        <div class="principle"><span class="num">5</span><strong>Примеры</strong><p>ИИ отлично копирует структуру. Дайте образец.</p></div>
+        <div class="principle"><span class="num">6</span><strong>Итерация</strong><p>Уточняйте задачу следующими сообщениями.</p></div>
+    </div>
+</section>
+
+<footer>
+    <p>Библиотека собрана на основе материалов: postium.ru, vc.ru, aiacademy.me, aiwebnet.org, dtf.ru, habr.com.</p>
+    <p style="margin-top:0.5rem;">Промпт-инжиниринг — это ремесло, а не кнопка. Сохраняйте удачные промпты, тестируйте, адаптируйте.</p>
+</footer>
+
+</div>
+</body>
+</html>
